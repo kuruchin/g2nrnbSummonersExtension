@@ -13,7 +13,7 @@ var int SE_JinaFreeSlotLearned;
 var int SE_SummonManaLearned;
 var int SE_JinaSummonBypass;
 var int SE_PersistSummonMax;
-var int SE_SummonParentDialog;
+var int SE_NecroGallahadRefused;
 
 const int SE_REQ_CIRCLE_JINA = 2;
 const int SE_REQ_CIRCLE_SLOT1 = 3;
@@ -37,6 +37,15 @@ func int SE_HeroMagicCircle()
 func int SE_IsGallahadTeacherActive()
 {
     if (TALIASANTEACHMAGIC)
+    {
+        return TRUE;
+    };
+    return FALSE;
+};
+
+func int SE_IsUndeadSummoner()
+{
+    if (RX_IsNecroSummoner())
     {
         return TRUE;
     };

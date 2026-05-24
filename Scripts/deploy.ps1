@@ -6,9 +6,10 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+& (Join-Path $scriptDir "patch_compile_ou.ps1") -ErrorAction SilentlyContinue
 $enc1251 = [Text.Encoding]::GetEncoding(1251)
 $utf8 = New-Object System.Text.UTF8Encoding $false
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 if (-not (Test-Path $GameAutorun)) {
     Write-Error "Autorun folder not found: $GameAutorun"

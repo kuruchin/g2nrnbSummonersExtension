@@ -1730,7 +1730,6 @@ $(ALLUSERSPROFILE)\Union\SDK\Union\v1.0m\Build\incver.exe $(ProjectDir)</Command
     <None Include="..\Scripts\SummonersExtention.d" />
     <None Include="..\Scripts\SummonersExtention_DIA.d" />
     <None Include="..\Scripts\SummonersExtention_Quest.d" />
-    <None Include="..\Scripts\README.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".build_settings.inl" />

@@ -1,4 +1,4 @@
-# Restore Cyrillic in SummonersExtention_DIA.d (ASCII-only; Unicode escapes)
+# Restore Cyrillic in SummonersExtention_DIA.d (menu strings + Karma-style AI_Output comments)
 param(
     [string]$SourcePath = "",
     [string]$DestPath = ""
@@ -18,12 +18,13 @@ function U([string]$s) {
     return [System.Text.RegularExpressions.Regex]::Unescape($s)
 }
 
-$descMenu   = U "\u0418\u0437\u0443\u0447\u0435\u043d\u0438\u0435 \u043d\u0430\u0432\u044b\u043a\u043e\u0432 \u043f\u0440\u0438\u0437\u044b\u0432\u0430"
+$descMenu   = U "\u0418\u0437\u0443\u0447\u0435\u043d\u0438\u0435 \u043d\u0430\u0432\u044b\u043a\u043e\u0432 \u043f\u0440\u0438\u0437\u044b\u0432\u0430\u0442\u0435\u043b\u044f."
 $mana       = U "\u041c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u044d\u043d\u0435\u0440\u0433\u0438\u044f \u043f\u0440\u0438\u0437\u044b\u0432\u0430\u0442\u0435\u043b\u044f +25 (\u041e\u0447\u043a\u043e\u0432 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f: 7, \u0426\u0435\u043d\u0430: 1000 \u043c\u043e\u043d\u0435\u0442)"
 $jina       = U "\u0418\u0437\u0443\u0447\u0438\u0442\u044c \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u0435 \u0414\u0436\u0438\u043d\u044b: \u0441\u043d\u044f\u0442\u0438\u0435 \u043b\u0438\u043c\u0438\u0442\u0430 \u043f\u0440\u0438\u0437\u044b\u0432\u0430 (\u041e\u0447\u043a\u043e\u0432 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f: 10, \u0426\u0435\u043d\u0430: 1000 \u043c\u043e\u043d\u0435\u0442)"
 $slot1      = U "\u0423\u0432\u0435\u043b\u0438\u0447\u0435\u043d\u0438\u0435 \u043c\u0430\u043a\u0441\u0438\u043c\u0443\u043c\u0430 \u043f\u0440\u0438\u0437\u0432\u0430\u043d\u043d\u044b\u0445 \u0441\u0443\u0449\u0435\u0441\u0442\u0432 I: +1 (\u041e\u0447\u043a\u043e\u0432 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f: 15, \u0426\u0435\u043d\u0430: 2000 \u043c\u043e\u043d\u0435\u0442)"
 $slot2      = U "\u0423\u0432\u0435\u043b\u0438\u0447\u0435\u043d\u0438\u0435 \u043c\u0430\u043a\u0441\u0438\u043c\u0443\u043c\u0430 \u043f\u0440\u0438\u0437\u0432\u0430\u043d\u043d\u044b\u0445 \u0441\u0443\u0449\u0435\u0441\u0442\u0432 II: +1 (\u041e\u0447\u043a\u043e\u0432 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u044f: 20, \u0426\u0435\u043d\u0430: 4000 \u043c\u043e\u043d\u0435\u0442)"
 $needJinaDlg = U "\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u043d\u0430\u0439\u0434\u0438 \u0440\u0443\u043d\u0443 \u043f\u0440\u0438\u0437\u044b\u0432\u0430 \u043e\u0441\u043e\u0431\u043e\u0433\u043e \u0432\u043e\u043b\u043a\u0430 \u2014 \u0431\u0435\u0437 \u043d\u0435\u0451 \u044f \u043d\u0435 \u0441\u043c\u043e\u0433\u0443 \u043e\u0431\u0443\u0447\u0438\u0442\u044c \u0442\u0435\u0431\u044f \u043c\u0430\u0441\u0442\u0435\u0440\u0441\u0442\u0432\u0443 \u043f\u0440\u0438\u0437\u044b\u0432\u0430."
+$necroRefuse = U "\u0422\u0435\u0431\u044f \u0443\u0436\u0435 \u043e\u0431\u0443\u0447\u0430\u0435\u0442 \u043a\u0430\u043a\u043e\u0439-\u0442\u043e \u0442\u0451\u043c\u043d\u044b\u0439 \u043c\u0430\u0433 \u2014 \u044f \u043d\u0435 \u043c\u043e\u0433\u0443 \u0442\u0435\u0431\u044f \u043e\u0431\u0443\u0447\u0430\u0442\u044c."
 $allDone    = U "\u0412\u0441\u0435 \u043d\u0430\u0432\u044b\u043a\u0438 \u043f\u0440\u0438\u0437\u044b\u0432\u0430 \u0443\u0436\u0435 \u043e\u0441\u0432\u043e\u0435\u043d\u044b."
 $needC1     = U "\u0414\u043b\u044f \u043c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u043e\u0439 \u044d\u043d\u0435\u0440\u0433\u0438\u0438 \u043f\u0440\u0438\u0437\u044b\u0432\u0430\u0442\u0435\u043b\u044f \u043d\u0443\u0436\u0435\u043d \u043f\u0435\u0440\u0432\u044b\u0439 \u043a\u0440\u0443\u0433 \u043c\u0430\u0433\u0438\u0438."
 $needC2     = U "\u0414\u043b\u044f \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u044f \u0414\u0436\u0438\u043d\u044b \u0442\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044f \u0432\u0442\u043e\u0440\u043e\u0439 \u043a\u0440\u0443\u0433 \u043c\u0430\u0433\u0438\u0438."
@@ -36,14 +37,15 @@ $text = $text.Replace('"SE_CHOICE_MANA"', "`"$mana`"")
 $text = $text.Replace('"SE_CHOICE_SLOT1"', "`"$slot1`"")
 $text = $text.Replace('"SE_CHOICE_SLOT2"', "`"$slot2`"")
 $text = $text.Replace('"SE_CHOICE_JINA"', "`"$jina`"")
-$text = $text.Replace('"SE_DLG_NEED_JINA_RUNE"', "`"$needJinaDlg`"")
-$text = $text.Replace('AI_Print("SE_HINT_ALL_LEARNED");', "AI_Print(`"$allDone`");")
-$text = $text.Replace('AI_Print("SE_HINT_NEED_CIRCLE_1");', "AI_Print(`"$needC1`");")
-$text = $text.Replace('AI_Print("SE_HINT_NEED_CIRCLE_2");', "AI_Print(`"$needC2`");")
-$text = $text.Replace('AI_Print("SE_HINT_NEED_CIRCLE_3");', "AI_Print(`"$needC3`");")
-$text = $text.Replace('AI_Print("SE_HINT_NEED_CIRCLE_4");', "AI_Print(`"$needC4`");")
+$text = $text.Replace('// SE_DLG_NEED_JINA_RUNE', "// $needJinaDlg")
+$text = $text.Replace('// SE_DLG_NECRO_REFUSE', "// $necroRefuse")
+$text = $text.Replace('// SE_DLG_HINT_ALL', "// $allDone")
+$text = $text.Replace('// SE_DLG_HINT_C1', "// $needC1")
+$text = $text.Replace('// SE_DLG_HINT_C2', "// $needC2")
+$text = $text.Replace('// SE_DLG_HINT_C3', "// $needC3")
+$text = $text.Replace('// SE_DLG_HINT_C4', "// $needC4")
 
-if ($inPlace -and ($text -match 'SE_CHOICE_|SE_DESC_MENU|SE_HINT_|SE_DLG_')) {
+if ($inPlace -and ($text -match 'SE_CHOICE_|SE_DESC_MENU|SE_DLG_')) {
     Write-Error "DIA still contains untranslated SE_* markers"
 }
 

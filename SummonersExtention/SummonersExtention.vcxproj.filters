@@ -4670,9 +4670,6 @@
     <None Include="..\Scripts\SummonersExtention_Quest.d">
       <Filter>Scripts</Filter>
     </None>
-    <None Include="..\Scripts\README.md">
-      <Filter>Scripts</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
