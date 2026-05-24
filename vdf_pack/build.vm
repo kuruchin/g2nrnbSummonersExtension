@@ -1,0 +1,7 @@
+[BEGINVDF]
+Comment=SummonersExtention (NB_UNION_PLUGIN_ALLOWED_01 slot)
+BaseDir=.
+VDFName=SummonersExtention.vdf
+[FILES]
+System\Autorun\*
+[ENDVDF]

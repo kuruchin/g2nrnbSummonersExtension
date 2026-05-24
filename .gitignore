@@ -1,0 +1,24 @@
+.vs/
+*.user
+*.suo
+*.obj
+*.pdb
+*.iobj
+*.ipdb
+*.ilk
+*.exp
+*.log
+*.idb
+*.res
+*.recipe
+**/Summoner.*/
+**/G2A */
+**/G2 */
+**/G1A */
+**/G1 */
+**/MP x*/
+Bin/
+SummonersExtention/Bin/
+SummonersExtention/ZenGin/
+tools/
+vdf_pack/System/
