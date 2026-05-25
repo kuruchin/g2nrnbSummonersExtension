@@ -13,6 +13,7 @@ var int SE_JinaFreeSlotLearned;
 var int SE_SummonManaLearned;
 var int SE_JinaSummonBypass;
 var int SE_PersistSummonMax;
+var int SE_PersistGodGiftMana;
 var int SE_NecroGallahadRefused;
 
 const int SE_REQ_CIRCLE_JINA = 2;
@@ -71,6 +72,15 @@ func void SE_ApplySummonBonus()
     RX_GodGiftSummonMax = RX_GodGiftSummonMax + 1;
     RX_SUMMONMAX = RX_SUMMONMAX + 1;
     SE_PersistSummonMax = RX_SummonCountMax;
+};
+
+// NB: макс. мана считается через RX_GodGiftMana (как дары статуи), не через прямой hero.attribute.
+func void SE_ApplyManaBonus()
+{
+    RX_GodGiftMana = RX_GodGiftMana + SE_BONUS_MANA;
+    SE_PersistGodGiftMana = RX_GodGiftMana;
+    hero.attribute[ATR_MANA_MAX] = hero.attribute[ATR_MANA_MAX] + SE_BONUS_MANA;
+    hero.attribute[ATR_MANA] = hero.attribute[ATR_MANA] + SE_BONUS_MANA;
 };
 
 func int SE_TryPaySkillCost(var int lpCost, var int goldCost)
@@ -232,8 +242,7 @@ func void SE_LearnSummonMana()
         return;
     };
     SE_SummonManaLearned = TRUE;
-    hero.attribute[ATR_MANA_MAX] = hero.attribute[ATR_MANA_MAX] + SE_BONUS_MANA;
-    hero.attribute[ATR_MANA] = hero.attribute[ATR_MANA] + SE_BONUS_MANA;
+    SE_ApplyManaBonus();
     Snd_Play("LevelUP");
     AI_Print("SE_MSG_LEARN_MANA");
 };

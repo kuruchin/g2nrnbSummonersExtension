@@ -78,7 +78,7 @@
 | `Scripts/SummonersExtention_DIA.d`          | Диалог: permanent-тема `DIA_SE_GallahadSummon`, меню навыков |
 | `Scripts/SummonersExtention_Hook.d`         | Хуки лимита призыва и каста Джины                            |
 | `Scripts/SummonersExtention_Quest.d`        | Заготовка под квест (пока минимальная)                       |
-| `SummonersExtention/SummonersExtention.dll` | Union-плагин (синхронизация, опрос)                          |
+| `SummonersExtention/SummonersExtention.dll` | Union-плагин: восстановление лимита из `SE_PersistSummonMax` |
 
 
 ### Деплой в игру
@@ -103,6 +103,13 @@ INSTANCE DIA_SE_GallahadSummon (C_INFO)
     description = "Изучение навыков призыва";
 };
 ```
+
+---
+
+## Черновик V2 (тактика стаи)
+
+Наработки по новым скиллам (метка, хил, команды) — **`SKILLS_V2_DRAFT.md`**.  
+Справочник API NB из `AB_Scripts.vdf` — **`D:\Projects\Union\.UnionDB\nb-summoner-api-from-ab.md`**.
 
 ---
 

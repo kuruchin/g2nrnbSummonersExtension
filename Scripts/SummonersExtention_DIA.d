@@ -1,6 +1,6 @@
 // SummonersExtention - Taliasan (Gallahad) dialogs
-// Speech: text in // comment after AI_Output (Karma / CompileOU). No AI_Print for NPC lines.
-// Edit here in UTF-8. Deploy: Scripts\fix_and_deploy.ps1
+// Info_AddChoice: third arg = func void *_Info (Karma/NB), NOT C_INFO instance.
+// Speech: // comment after AI_Output. Edit UTF-8, deploy: fix_and_deploy.ps1
 
 META
 {
@@ -18,46 +18,6 @@ INSTANCE DIA_SE_GallahadSummon (C_INFO)
     important = FALSE;
     permanent = TRUE;
     description = "SE_DESC_MENU";
-};
-
-INSTANCE DIA_SE_LearnMana (C_INFO)
-{
-    npc = VLK_6027_TALIASAN;
-    nr = 960;
-    important = FALSE;
-    permanent = FALSE;
-    description = "SE_CHOICE_MANA";
-    information = DIA_SE_LearnMana_Info;
-};
-
-INSTANCE DIA_SE_LearnJina (C_INFO)
-{
-    npc = VLK_6027_TALIASAN;
-    nr = 961;
-    important = FALSE;
-    permanent = FALSE;
-    description = "SE_CHOICE_JINA";
-    information = DIA_SE_LearnJina_Info;
-};
-
-INSTANCE DIA_SE_LearnSlot1 (C_INFO)
-{
-    npc = VLK_6027_TALIASAN;
-    nr = 962;
-    important = FALSE;
-    permanent = FALSE;
-    description = "SE_CHOICE_SLOT1";
-    information = DIA_SE_LearnSlot1_Info;
-};
-
-INSTANCE DIA_SE_LearnSlot2 (C_INFO)
-{
-    npc = VLK_6027_TALIASAN;
-    nr = 963;
-    important = FALSE;
-    permanent = FALSE;
-    description = "SE_CHOICE_SLOT2";
-    information = DIA_SE_LearnSlot2_Info;
 };
 
 func int DIA_SE_GallahadSummon_Condition()
@@ -119,25 +79,25 @@ func void SE_OpenGallahadSummonMenu()
 
     if (SE_CanOfferSummonMana())
     {
-        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_MANA", DIA_SE_LearnMana);
+        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_MANA", DIA_SE_LearnMana_Info);
         hasChoice = TRUE;
     };
 
     if (SE_CanOfferJinaPerk())
     {
-        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_JINA", DIA_SE_LearnJina);
+        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_JINA", DIA_SE_LearnJina_Info);
         hasChoice = TRUE;
     };
 
     if (SE_CanOfferSlot1())
     {
-        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_SLOT1", DIA_SE_LearnSlot1);
+        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_SLOT1", DIA_SE_LearnSlot1_Info);
         hasChoice = TRUE;
     };
 
     if (SE_CanOfferSlot2())
     {
-        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_SLOT2", DIA_SE_LearnSlot2);
+        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_SLOT2", DIA_SE_LearnSlot2_Info);
         hasChoice = TRUE;
     };
 
