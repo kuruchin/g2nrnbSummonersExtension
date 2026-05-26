@@ -2,7 +2,7 @@
 # Source files in this folder: UTF-8 with SE_* markers. Game Autorun: CP1251.
 
 param(
-    [string]$GameAutorun = "d:\Games\Steam\steamapps\common\Gothic II\system\Autorun"
+    [string]$GameAutorun = "d:\Games\Steam\steamapps\common\Gothic II_8_0\system\Autorun"
 )
 
 $ErrorActionPreference = "Stop"
@@ -55,11 +55,16 @@ $dllCandidates = @(
     (Join-Path $projectRoot "SummonersExtention\Bin\SummonersExtention.dll"),
     (Join-Path $projectRoot "Bin\SummonersExtention.dll")
 )
-$dll = $dllCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-if ($dll) {
-    $sys = Split-Path $GameAutorun -Parent
-    Copy-Item $dll (Join-Path $sys "SummonersExtention.dll") -Force
-    Write-Host "Deployed: SummonersExtention.dll (local test; release uses VDF NB_UNION_PLUGIN_ALLOWED_01)"
+# DLL only in Data\SummonersExtention.vdf (NB_UNION_PLUGIN_ALLOWED_01.dll). Required for bars.
+$vdfBat = Join-Path (Split-Path $scriptDir -Parent) "vdf_pack\build_vdf.bat"
+if (Test-Path $vdfBat) {
+    cmd /c "`"$vdfBat`""
+    $vdfSrc = Join-Path (Split-Path $scriptDir -Parent) "vdf_pack\SummonersExtention.vdf"
+    $gameData = Join-Path (Split-Path $GameAutorun -Parent) "..\Data"
+    if ((Test-Path $vdfSrc) -and (Test-Path $gameData)) {
+        Copy-Item $vdfSrc (Join-Path $gameData "SummonersExtention.vdf") -Force
+        Write-Host "VDF -> $(Join-Path $gameData 'SummonersExtention.vdf')"
+    }
 }
 
 Write-Host "Done."

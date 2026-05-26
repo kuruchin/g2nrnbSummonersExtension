@@ -65,4 +65,5 @@ uint RTDynamicCast_MT = (uint)__RTDynamicCast;
 #define GOTHIC_ENGINE Gothic_II_Addon
 #define ENGINE Engine_G2A
 #include "Sources.h"
+#include "SummonBars_G2A.inl"
 #endif

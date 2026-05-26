@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Ðóññêèé (Ðîññèÿ) resources
+// ˜˜˜˜˜˜˜ (˜˜˜˜˜˜) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
 LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
@@ -59,8 +59,8 @@ IDR_PATCH1              PATCH                   "Plugin.patch"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,34
- PRODUCTVERSION 1,0,0,34
+ FILEVERSION 1,0,0,105
+ PRODUCTVERSION 1,0,0,105
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -77,12 +77,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Gothic community"
             VALUE "FileDescription", "Plugin for Gothic"
-            VALUE "FileVersion", "1.0.0.34"
+            VALUE "FileVersion", "1.0.0.105"
             VALUE "InternalName", "Plugin"
             VALUE "LegalCopyright", "Copyright (C) 2023"
             VALUE "OriginalFilename", "Plugin"
             VALUE "ProductName", "Plugin"
-            VALUE "ProductVersion", "1.0.0.34"
+            VALUE "ProductVersion", "1.0.0.105"
         END
     END
     BLOCK "VarFileInfo"
@@ -101,7 +101,7 @@ END
 // remains consistent on all systems.
 IDI_ICON1               ICON                    "union.ico"
 
-#endif    // Ðóññêèé (Ðîññèÿ) resources
+#endif    // ˜˜˜˜˜˜˜ (˜˜˜˜˜˜) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

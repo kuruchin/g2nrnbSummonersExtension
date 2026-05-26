@@ -16,6 +16,12 @@ var int SE_PersistSummonMax;
 var int SE_PersistGodGiftMana;
 var int SE_NecroGallahadRefused;
 
+// Extra summon HP bars (C++ SE_DrawAllBars_Eb in B_UPDATESTAMINABAR)
+var int SE_SummonBarShow;
+var int SE_SummonBarPosY;
+var int SE_DllLoaded;
+
+const int SE_SUMMON_BAR_DEFAULT = 1;
 const int SE_REQ_CIRCLE_JINA = 2;
 const int SE_REQ_CIRCLE_SLOT1 = 3;
 const int SE_REQ_CIRCLE_SLOT2 = 4;
@@ -246,3 +252,7 @@ func void SE_LearnSummonMana()
     Snd_Play("LevelUP");
     AI_Print("SE_MSG_LEARN_MANA");
 };
+
+// SummonersExtention.dll — summon HP bars (EB draw)
+func void SE_NativeSyncBarIni() {};
+func void SE_NativeRunBarHudTick() {};
