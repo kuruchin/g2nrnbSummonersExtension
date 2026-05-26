@@ -21,6 +21,16 @@ var int SE_SummonBarShow;
 var int SE_SummonBarPosY;
 var int SE_DllLoaded;
 
+// Порог опыта на начале текущего уровня уника (для % заполнения, сохраняется в сейве)
+var int SE_JinaWolfExpFloor;
+var int SE_JinaWolfExpTrackLvl;
+var int SE_CraitExpFloor;
+var int SE_CraitExpTrackLvl;
+var int SE_SkeletonUniqExpFloor;
+var int SE_SkeletonUniqExpTrackLvl;
+var int SE_DemonHubExpFloor;
+var int SE_DemonHubExpTrackLvl;
+
 const int SE_SUMMON_BAR_DEFAULT = 1;
 const int SE_REQ_CIRCLE_JINA = 2;
 const int SE_REQ_CIRCLE_SLOT1 = 3;
