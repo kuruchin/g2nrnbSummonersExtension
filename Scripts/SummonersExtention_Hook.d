@@ -1,5 +1,4 @@
 // SummonersExtention - hooks for NB summon limit checks (Jina free slot)
-// Edit here in UTF-8. Deploy to game: Scripts\deploy.ps1 (converts to CP1251)
 
 META
 {
@@ -29,7 +28,6 @@ func int GetSummonCountMax()
 {
     var int maxVal;
     var int bonus;
-
     maxVal = GetSummonCountMax_Old();
     bonus = SE_JinaEffectiveSlotBonus();
     if (bonus > 0)
@@ -42,14 +40,46 @@ func int GetSummonCountMax()
 func int spell_logic_sumjina(var int manainvested)
 {
     var int result;
-
-    if (SE_JinaFreeSlotLearned && !JinaWolfIsUp)
+    SE_JinaCastWasAlive = SE_JinaWasAlive;
+    if (JinaWolfIsUp)
+    {
+        return FALSE;
+    };
+    if (SE_JinaIsPetReallyUp())
+    {
+        return FALSE;
+    };
+    if (SE_JinaInGame)
+    {
+        return FALSE;
+    };
+    if (SE_JinaRevivePending)
+    {
+        return FALSE;
+    };
+    if (SE_JinaReviveDelayTicks > 0)
+    {
+        return FALSE;
+    };
+    if (SE_JinaFreeSlotLearned || SE_JinaAutoReviveLearned)
     {
         SE_JinaSummonBypass = TRUE;
     };
-
     result = spell_logic_sumjina_Old(manainvested);
-
     SE_JinaSummonBypass = FALSE;
+    if (!JinaWolfIsUp && SE_JinaIsPetReallyUp())
+    {
+        JinaWolfIsUp = TRUE;
+    };
+    if (SE_JinaAutoReviveLearned && result && JinaWolfIsUp)
+    {
+        SE_JinaInGame = TRUE;
+        SE_JinaOnSuccessfulSummon();
+        SE_JinaCancelAutoReviveQueue();
+        if (SE_JinaCastWasAlive)
+        {
+            SE_JinaLastManualResummonCl = SE_JinaCheckLoopN;
+        };
+    };
     return result;
 };

@@ -23,6 +23,7 @@ namespace Gothic_II_Addon {
 
   struct SE_UniquePetHudInfo {
     bool active;
+    bool isJina;
     int x;
     int y;
     int w;
@@ -69,6 +70,181 @@ namespace Gothic_II_Addon {
     if (adr) {
       *static_cast<int*>(adr) = val;
     }
+  }
+
+  static const int SE_JINA_REVIVE_CD_MS = 20000;
+  static const int SE_JINA_REVIVE_DELAY_MS = 1000;
+  static const int SE_WOLF_PACK_BURST_DELAY_MS = 2000;
+  static unsigned long SE_JinaReviveCdEndMs = 0;
+  static unsigned long SE_JinaReviveDelayEndMs = 0;
+  static unsigned long SE_WolfPackBurstDelayEndMs = 0;
+  static int SE_WolfPackRmbPrevDown = 0;
+
+  enum SE_JinaCdState {
+    SE_CD_IDLE = 0,
+    SE_CD_RUNNING = 1,
+    SE_CD_FINISHED = 2
+  };
+  static SE_JinaCdState g_JinaCdState = SE_CD_IDLE;
+
+  static void SE_JinaRevive_UpdateDelay() {
+    if (SE_JinaReviveDelayEndMs == 0) {
+      return;
+    }
+    const unsigned long now = GetTickCount();
+    if (now >= SE_JinaReviveDelayEndMs) {
+      SE_BarWriteIntSymbol("SE_JinaReviveDelayTicks", 0);
+      return;
+    }
+    const int leftMs = static_cast<int>(SE_JinaReviveDelayEndMs - now);
+    SE_BarWriteIntSymbol("SE_JinaReviveDelayTicks", (leftMs + 999) / 1000);
+  }
+
+  void SE_JinaRevive_ArmDelay() {
+    SE_JinaReviveDelayEndMs = GetTickCount() + SE_JINA_REVIVE_DELAY_MS;
+    SE_BarWriteIntSymbol("SE_JinaReviveDelayTicks", (SE_JINA_REVIVE_DELAY_MS + 999) / 1000);
+  }
+
+  void SE_JinaRevive_ClearDelay() {
+    SE_JinaReviveDelayEndMs = 0;
+    SE_BarWriteIntSymbol("SE_JinaReviveDelayTicks", 0);
+  }
+
+  // SE_WolfPackBurstDelayTicks: 0 = можно следующий призыв, 1 = пауза (мс в C++, не RX_CheckLoop).
+  static void SE_WolfPack_UpdateBurstDelay() {
+    if (SE_WolfPackBurstDelayEndMs == 0) {
+      SE_BarWriteIntSymbol("SE_WolfPackBurstDelayTicks", 0);
+      return;
+    }
+    const unsigned long now = GetTickCount();
+    if (now >= SE_WolfPackBurstDelayEndMs) {
+      SE_WolfPackBurstDelayEndMs = 0;
+      SE_BarWriteIntSymbol("SE_WolfPackBurstDelayTicks", 0);
+      return;
+    }
+    SE_BarWriteIntSymbol("SE_WolfPackBurstDelayTicks", 1);
+  }
+
+  void SE_WolfPack_ArmBurstDelay() {
+    SE_WolfPackBurstDelayEndMs = GetTickCount() + SE_WOLF_PACK_BURST_DELAY_MS;
+    SE_BarWriteIntSymbol("SE_WolfPackBurstDelayTicks", 1);
+  }
+
+  void SE_WolfPack_ClearBurstDelay() {
+    SE_WolfPackBurstDelayEndMs = 0;
+    SE_BarWriteIntSymbol("SE_WolfPackBurstDelayTicks", 0);
+  }
+
+  int __cdecl SE_WolfPack_ArmBurstDelay_External() {
+    SE_WolfPack_ArmBurstDelay();
+    return 0;
+  }
+
+  int __cdecl SE_WolfPack_SyncBurstDelay_External() {
+    SE_WolfPack_UpdateBurstDelay();
+    return 0;
+  }
+
+  int __cdecl SE_WolfPack_ClearBurstDelay_External() {
+    SE_WolfPack_ClearBurstDelay();
+    return 0;
+  }
+
+  void SE_WolfPack_PollRmbInput() {
+    int down = 0;
+    if (zinput) {
+      down = zinput->KeyPressed(MOUSE_BUTTONRIGHT) ? 1 : 0;
+    }
+    const int click = (down && !SE_WolfPackRmbPrevDown) ? 1 : 0;
+    SE_WolfPackRmbPrevDown = down;
+    SE_BarWriteIntSymbol("SE_WolfPackRmbClick", click);
+  }
+
+  int __cdecl SE_WolfPack_PollRmbInput_External() {
+    SE_WolfPack_PollRmbInput();
+    return 0;
+  }
+
+  void __cdecl SE_JinaRevive_ArmCd() {
+    g_JinaCdState = SE_CD_RUNNING;
+    SE_JinaReviveCdEndMs = GetTickCount() + SE_JINA_REVIVE_CD_MS;
+    SE_BarWriteIntSymbol("SE_JinaReviveCdLeft", 20);
+    SE_BarWriteIntSymbol("SE_JinaCdDbgState", SE_CD_RUNNING);
+    SE_BarWriteIntSymbol("SE_JinaReviveReady", 0);
+  }
+
+  void __cdecl SE_JinaRevive_DisarmCd() {
+    // Legacy no-op: timer stops only when it reaches zero in UpdateCdTimer.
+  }
+
+  static int SE_JinaRevive_GetCdLeftSecInternal() {
+    if (g_JinaCdState != SE_CD_RUNNING || SE_JinaReviveCdEndMs == 0) {
+      return 0;
+    }
+    const unsigned long now = GetTickCount();
+    if (SE_JinaReviveCdEndMs > now) {
+      return static_cast<int>((SE_JinaReviveCdEndMs - now + 999) / 1000);
+    }
+    return 0;
+  }
+
+  static void SE_JinaRevive_MaybeFinishCd() {
+    if (g_JinaCdState != SE_CD_RUNNING || SE_JinaReviveCdEndMs == 0) {
+      return;
+    }
+    if (GetTickCount() >= SE_JinaReviveCdEndMs) {
+      g_JinaCdState = SE_CD_FINISHED;
+      SE_BarWriteIntSymbol("SE_JinaReviveCdLeft", 0);
+      SE_BarWriteIntSymbol("SE_JinaReviveReady", 1);
+    }
+  }
+
+  static void SE_JinaRevive_PublishCdState() {
+    SE_BarWriteIntSymbol("SE_JinaCdDbgState", static_cast<int>(g_JinaCdState));
+  }
+
+  static void SE_JinaRevive_UpdateCdTimer() {
+    if (!parser || SE_BarReadIntSymbol("SE_JinaAutoReviveLearned") <= 0) {
+      return;
+    }
+    SE_JinaRevive_MaybeFinishCd();
+    if (g_JinaCdState == SE_CD_RUNNING && SE_JinaReviveCdEndMs != 0) {
+      const unsigned long now = GetTickCount();
+      if (now >= SE_JinaReviveCdEndMs) {
+        g_JinaCdState = SE_CD_FINISHED;
+        SE_BarWriteIntSymbol("SE_JinaReviveCdLeft", 0);
+        SE_BarWriteIntSymbol("SE_JinaReviveReady", 1);
+      } else {
+        const int leftSec = static_cast<int>((SE_JinaReviveCdEndMs - now + 999) / 1000);
+        SE_BarWriteIntSymbol("SE_JinaReviveCdLeft", leftSec);
+      }
+    }
+    SE_JinaRevive_PublishCdState();
+  }
+
+  int __cdecl SE_JinaRevive_ArmCd_External() {
+    SE_JinaRevive_ArmCd();
+    return 0;
+  }
+
+  int __cdecl SE_JinaRevive_SyncCd_External() {
+    SE_JinaRevive_UpdateCdTimer();
+    return 0;
+  }
+
+  int __cdecl SE_JinaRevive_ArmDelay_External() {
+    SE_JinaRevive_ArmDelay();
+    return 0;
+  }
+
+  int __cdecl SE_JinaRevive_SyncDelay_External() {
+    SE_JinaRevive_UpdateDelay();
+    return 0;
+  }
+
+  int __cdecl SE_JinaRevive_ClearDelay_External() {
+    SE_JinaRevive_ClearDelay();
+    return 0;
   }
 
   static bool SE_EbCanDraw() {
@@ -173,10 +349,7 @@ namespace Gothic_II_Addon {
     return *sym->stringdata;
   }
 
-  static void SE_ApplyBarLabelFont() {
-    if (!SE_BarTextLayer) {
-      return;
-    }
+  static zSTRING SE_GetHudLabelFont() {
     static zSTRING barLabelFont;
     if (barLabelFont.IsEmpty()) {
       const char* candidates[] = { "font_screensmall", "text_font_10", "font_game" };
@@ -187,10 +360,25 @@ namespace Gothic_II_Addon {
         }
       }
     }
-    if (!barLabelFont.IsEmpty()) {
-      SE_BarTextLayer->SetFont(barLabelFont);
+    return barLabelFont;
+  }
+
+  static void SE_ApplyHudFont(zCView* view) {
+    if (!view) {
+      return;
     }
-    SE_BarTextLayer->SetFontColor(zCOLOR(255, 255, 255));
+    const zSTRING font = SE_GetHudLabelFont();
+    if (!font.IsEmpty()) {
+      view->SetFont(font);
+    }
+    view->SetFontColor(zCOLOR(255, 255, 255));
+  }
+
+  static void SE_ApplyBarLabelFont() {
+    if (!SE_BarTextLayer) {
+      return;
+    }
+    SE_ApplyHudFont(SE_BarTextLayer);
   }
 
   static void SE_EnsureBarTextLayer() {
@@ -209,8 +397,49 @@ namespace Gothic_II_Addon {
     }
   }
 
-  static void SE_DrawBarLabelsOverlay(const SE_UniquePetHudInfo& uniquePet, const SE_BarLabelRect* labels, int labelCount) {
-    if (!screen || (!uniquePet.active && labelCount <= 0)) {
+  static void SE_DrawJinaReviveHudTexts(zCView* view, int barX, int barY, int barW, int barH, int level, int xpPct, bool hasXpRow) {
+    if (!view) {
+      return;
+    }
+    // КД автопризыва — только пока Джина призвана.
+    const int jinaUp = SE_BarReadIntSymbol("JinaWolfIsUp");
+    if (jinaUp <= 0) {
+      return;
+    }
+
+    int cdSec = SE_JinaRevive_GetCdLeftSecInternal();
+    if (cdSec <= 0) {
+      cdSec = SE_BarReadIntSymbol("SE_JinaReviveCdLeft");
+    }
+    if (cdSec < 0) {
+      cdSec = 0;
+    }
+
+    zSTRING timer;
+    const bool cdBlocking = (g_JinaCdState == SE_CD_RUNNING) && (cdSec > 0);
+    if (!cdBlocking) {
+      timer = zSTRING("OK");
+    } else {
+      timer = zSTRING("\xCA\xC4: ") + Z(cdSec) + zSTRING(" \xF1");
+    }
+
+    const int textH = view->FontY();
+    const int timerY = barY + (barH - textH) / 2;
+    if (hasXpRow) {
+      zSTRING xpTxt = Z(level) + zSTRING(" \xD3\xF0. ") + Z(xpPct) + "%";
+      const int xpW = view->FontSize(xpTxt);
+      const int timerX = barX + barW + 12 + xpW + 10;
+      view->Print(timerX, timerY, timer);
+    } else {
+      const int timerW = view->FontSize(timer);
+      const int timerX = barX + barW + 12;
+      view->Print(timerX, timerY, timer);
+    }
+  }
+
+  static void SE_DrawBarLabelsOverlay(const SE_UniquePetHudInfo& uniquePet, const SE_BarLabelRect* labels, int labelCount, int anchorX, int anchorY, int anchorW, int anchorH) {
+    const bool jinaHudNeeded = SE_BarReadIntSymbol("SE_JinaAutoReviveLearned") > 0;
+    if (!screen || (!uniquePet.active && labelCount <= 0 && !jinaHudNeeded)) {
       SE_HideBarTextLayer();
       return;
     }
@@ -229,9 +458,15 @@ namespace Gothic_II_Addon {
       const int textH = SE_BarTextLayer->FontY();
       const int hpX = uniquePet.x + (uniquePet.w - hpW) / 2;
       const int hpY = uniquePet.y + (uniquePet.h - textH) / 2;
+
+      if (uniquePet.isJina && SE_BarReadIntSymbol("SE_JinaAutoReviveLearned") > 0) {
+        SE_BarTextLayer->SetFontColor(zCOLOR(255, 255, 255));
+        SE_DrawJinaReviveHudTexts(SE_BarTextLayer, uniquePet.x, uniquePet.y, uniquePet.w, uniquePet.h, uniquePet.level, uniquePet.xpPct, true);
+        SE_BarTextLayer->SetFontColor(zCOLOR(0, 255, 0));
+      }
+
       SE_BarTextLayer->Print(hpX, hpY, hpTxt);
 
-      // "12 Ур. 67%" (CP1251-safe "Ур.")
       zSTRING sideTxt = Z(uniquePet.level) + zSTRING(" \xD3\xF0. ") + Z(uniquePet.xpPct) + "%";
       const int sideX = uniquePet.x + uniquePet.w + 12;
       const int sideY = uniquePet.y + (uniquePet.h - textH) / 2;
@@ -613,6 +848,7 @@ namespace Gothic_II_Addon {
       SE_GetUniquePetLevelAndXpPct(npc, level, pct);
 
       info.active = true;
+      info.isJina = SE_InstanceEquals(npc, "PET_JINA");
       info.x = barX;
       info.y = barY;
       info.w = barW;
@@ -700,6 +936,9 @@ namespace Gothic_II_Addon {
 
     if (!SE_IsSummonBarEnabled() || !ogame->GetGameWorld()) {
       SE_RemoveNativeBarsFromScreen();
+      if (SE_BarReadIntSymbol("SE_JinaAutoReviveLearned") > 0) {
+        SE_DrawBarLabelsOverlay(uniquePet, nullptr, 0, anchorX, anchorY, sx, sy);
+      }
       return;
     }
 
@@ -768,7 +1007,7 @@ namespace Gothic_II_Addon {
       SE_EbHideBar(SE_NativeBars[j]);
     }
 
-    SE_DrawBarLabelsOverlay(uniquePet, labels, labelCount);
+    SE_DrawBarLabelsOverlay(uniquePet, labels, labelCount, anchorX, anchorY, sx, sy);
   }
 
   static void SE_DrawSummonHud_G2A() {
@@ -791,6 +1030,7 @@ namespace Gothic_II_Addon {
   }
 
   void __cdecl SE_NativeRunBarHudTick() {
+    SE_JinaRevive_UpdateCdTimer();
     SE_DrawSummonHud_G2A();
   }
 
@@ -835,12 +1075,74 @@ namespace Gothic_II_Addon {
       zPAR_TYPE_VOID,
       zPAR_TYPE_VOID
     );
+    parser->DefineExternal(
+      zSTRING("SE_JinaRevive_ArmCd"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_JinaRevive_ArmCd_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_JinaRevive_DisarmCd"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_JinaRevive_DisarmCd),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_JinaRevive_SyncCd"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_JinaRevive_SyncCd_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_JinaRevive_ArmDelay"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_JinaRevive_ArmDelay_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_JinaRevive_SyncDelay"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_JinaRevive_SyncDelay_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_JinaRevive_ClearDelay"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_JinaRevive_ClearDelay_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_WolfPack_ArmBurstDelay"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_WolfPack_ArmBurstDelay_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_WolfPack_SyncBurstDelay"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_WolfPack_SyncBurstDelay_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_WolfPack_ClearBurstDelay"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_WolfPack_ClearBurstDelay_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
+    parser->DefineExternal(
+      zSTRING("SE_WolfPack_PollRmbInput"),
+      reinterpret_cast<int(__cdecl*)(void)>(SE_WolfPack_PollRmbInput_External),
+      zPAR_TYPE_VOID,
+      zPAR_TYPE_VOID
+    );
   }
 
   HOOK Hook_oCGame_UpdatePlayerStatus PATCH(&oCGame::UpdatePlayerStatus, &oCGame::UpdatePlayerStatus_SE);
 
   void oCGame::UpdatePlayerStatus_SE() {
     THISCALL(Hook_oCGame_UpdatePlayerStatus)();
+    SE_JinaRevive_UpdateCdTimer();
+    SE_WolfPack_UpdateBurstDelay();
     SE_DrawSummonHud_G2A();
   }
 

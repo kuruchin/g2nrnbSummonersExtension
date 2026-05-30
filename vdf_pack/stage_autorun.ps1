@@ -27,11 +27,18 @@ Write-Host "Staged: SummersExtention_DIA.d"
 Get-ChildItem $scripts -Filter "SummonersExtention*.d" | Where-Object {
     $_.Name -notin @("SummonersExtention.d", "SummonersExtention_DIA.d")
 } | ForEach-Object {
-    $content = [IO.File]::ReadAllText($_.FullName, $utf8)
+    $src = $_.FullName
+    $dest = Join-Path $autorun $_.Name
+    if ($_.Name -eq "SummonersExtention_WolfPack.d") {
+        & (Join-Path $scripts "fix_wolf_pack_strings.ps1") -SourcePath $src -DestPath $dest
+        $content = [IO.File]::ReadAllText($dest, $utf8)
+    }
+    else {
+        $content = [IO.File]::ReadAllText($src, $utf8)
+    }
     if ($content -match '[\?]{4,}') {
         Write-Error "$($_.Name): broken Cyrillic before VDF staging"
     }
-    $dest = Join-Path $autorun $_.Name
     [IO.File]::WriteAllText($dest, $content, $enc1251)
     Write-Host "Staged: $($_.Name)"
 }

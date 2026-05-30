@@ -35,12 +35,12 @@ func int DIA_SE_GallahadSummon_Condition()
 
 func void SE_ShowSummonRequirementHint()
 {
-    if (SE_CanOfferJinaPerk() || SE_CanOfferSlot1() || SE_CanOfferSlot2() || SE_CanOfferSummonMana())
+    if (SE_CanOfferJinaPerk() || SE_CanOfferJinaAutoRevive() || SE_CanOfferSlot1() || SE_CanOfferSlot2() || SE_CanOfferSummonMana() || SE_CanOfferWolfPackSummon())
     {
         return;
     };
 
-    if (SE_JinaFreeSlotLearned && SE_SummonSlot1Learned && SE_SummonSlot2Learned && SE_SummonManaLearned)
+    if (SE_JinaFreeSlotLearned && SE_JinaAutoReviveLearned && SE_SummonSlot1Learned && SE_SummonSlot2Learned && SE_SummonManaLearned && SE_WolfPackSummonLearned)
     {
         AI_Output(self, other, "DIA_SE_Hint_AllLearned_01_00"); // SE_DLG_HINT_ALL
         return;
@@ -52,7 +52,7 @@ func void SE_ShowSummonRequirementHint()
         return;
     };
 
-    if (!SE_JinaFreeSlotLearned && SE_HeroMagicCircle() < SE_REQ_CIRCLE_JINA)
+    if ((!SE_JinaFreeSlotLearned || !SE_JinaAutoReviveLearned) && SE_HeroMagicCircle() < SE_REQ_CIRCLE_JINA)
     {
         AI_Output(self, other, "DIA_SE_Hint_Circle2_01_00"); // SE_DLG_HINT_C2
         return;
@@ -67,6 +67,12 @@ func void SE_ShowSummonRequirementHint()
     if (!SE_SummonSlot2Learned && SE_HeroMagicCircle() < SE_REQ_CIRCLE_SLOT2)
     {
         AI_Output(self, other, "DIA_SE_Hint_Circle4_01_00"); // SE_DLG_HINT_C4
+        return;
+    };
+
+    if (!SE_WolfPackSummonLearned && SE_HeroHasWolfRuneUnlocked() && SE_HeroMagicCircle() < SE_REQ_CIRCLE_WOLF_PACK)
+    {
+        AI_Output(self, other, "DIA_SE_Hint_Circle2_01_00"); // SE_DLG_HINT_C2
     };
 };
 
@@ -89,6 +95,12 @@ func void SE_OpenGallahadSummonMenu()
         hasChoice = TRUE;
     };
 
+    if (SE_CanOfferJinaAutoRevive())
+    {
+        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_JINA_REVIVE", DIA_SE_LearnJinaRevive_Info);
+        hasChoice = TRUE;
+    };
+
     if (SE_CanOfferSlot1())
     {
         Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_SLOT1", DIA_SE_LearnSlot1_Info);
@@ -98,6 +110,12 @@ func void SE_OpenGallahadSummonMenu()
     if (SE_CanOfferSlot2())
     {
         Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_SLOT2", DIA_SE_LearnSlot2_Info);
+        hasChoice = TRUE;
+    };
+
+    if (SE_CanOfferWolfPackSummon())
+    {
+        Info_AddChoice(DIA_SE_GallahadSummon, "SE_CHOICE_WOLF_PACK", DIA_SE_LearnWolfPack_Info);
         hasChoice = TRUE;
     };
 
@@ -116,13 +134,13 @@ func void DIA_SE_GallahadSummon_Info()
         return;
     };
 
-    if (!SE_HeroHasJinaRuneUnlocked())
+    if (!SE_HeroHasJinaRuneUnlocked() && !SE_HeroHasWolfRuneUnlocked())
     {
-        AI_Output(self, other, "DIA_SE_NeedJinaRune_01_00"); // SE_DLG_NEED_JINA_RUNE
+        AI_Output(self, other, "DIA_SE_NeedSummonRune_01_00"); // SE_DLG_NEED_SUMMON_RUNE
         return;
     };
 
-    if (!SE_CanOfferJinaPerk() && !SE_CanOfferSlot1() && !SE_CanOfferSlot2() && !SE_CanOfferSummonMana())
+    if (!SE_CanOfferJinaPerk() && !SE_CanOfferJinaAutoRevive() && !SE_CanOfferSlot1() && !SE_CanOfferSlot2() && !SE_CanOfferSummonMana() && !SE_CanOfferWolfPackSummon())
     {
         SE_ShowSummonRequirementHint();
         return;
@@ -131,10 +149,28 @@ func void DIA_SE_GallahadSummon_Info()
     SE_OpenGallahadSummonMenu();
 };
 
+func int SE_GallahadSummonMenuHasOffers()
+{
+    if (SE_CanOfferJinaPerk() || SE_CanOfferJinaAutoRevive() || SE_CanOfferSlot1() || SE_CanOfferSlot2() || SE_CanOfferSummonMana() || SE_CanOfferWolfPackSummon())
+    {
+        return TRUE;
+    };
+    return FALSE;
+};
+
+func void DIA_SE_LearnWolfPack_Info()
+{
+    SE_LearnWolfPackSummon();
+    if (SE_GallahadSummonMenuHasOffers())
+    {
+        SE_OpenGallahadSummonMenu();
+    };
+};
+
 func void DIA_SE_LearnSlot1_Info()
 {
     SE_LearnSlot1();
-    if (SE_CanOfferJinaPerk() || SE_CanOfferSlot1() || SE_CanOfferSlot2() || SE_CanOfferSummonMana())
+    if (SE_GallahadSummonMenuHasOffers())
     {
         SE_OpenGallahadSummonMenu();
     };
@@ -143,7 +179,7 @@ func void DIA_SE_LearnSlot1_Info()
 func void DIA_SE_LearnSlot2_Info()
 {
     SE_LearnSlot2();
-    if (SE_CanOfferJinaPerk() || SE_CanOfferSlot1() || SE_CanOfferSlot2() || SE_CanOfferSummonMana())
+    if (SE_GallahadSummonMenuHasOffers())
     {
         SE_OpenGallahadSummonMenu();
     };
@@ -152,7 +188,16 @@ func void DIA_SE_LearnSlot2_Info()
 func void DIA_SE_LearnJina_Info()
 {
     SE_LearnJinaPerk();
-    if (SE_CanOfferJinaPerk() || SE_CanOfferSlot1() || SE_CanOfferSlot2() || SE_CanOfferSummonMana())
+    if (SE_GallahadSummonMenuHasOffers())
+    {
+        SE_OpenGallahadSummonMenu();
+    };
+};
+
+func void DIA_SE_LearnJinaRevive_Info()
+{
+    SE_LearnJinaAutoRevive();
+    if (SE_GallahadSummonMenuHasOffers())
     {
         SE_OpenGallahadSummonMenu();
     };
@@ -161,7 +206,7 @@ func void DIA_SE_LearnJina_Info()
 func void DIA_SE_LearnMana_Info()
 {
     SE_LearnSummonMana();
-    if (SE_CanOfferJinaPerk() || SE_CanOfferSlot1() || SE_CanOfferSlot2() || SE_CanOfferSummonMana())
+    if (SE_GallahadSummonMenuHasOffers())
     {
         SE_OpenGallahadSummonMenu();
     };

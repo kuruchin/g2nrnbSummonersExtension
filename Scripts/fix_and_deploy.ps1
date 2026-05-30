@@ -11,4 +11,3 @@ if (-not (Test-Path $msb)) {
 & $msb (Join-Path $root "SummonersExtention\SummonersExtention.vcxproj") /p:Configuration="G2A MD Release" /p:Platform=Win32 /v:m /nologo
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 & (Join-Path $PSScriptRoot "deploy.ps1")
-& (Join-Path $PSScriptRoot "deploy_vdf.ps1")

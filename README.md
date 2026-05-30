@@ -77,6 +77,7 @@
 | `Scripts/SummonersExtention.d`              | Логика перков, оплата, применение бонусов                    |
 | `Scripts/SummonersExtention_DIA.d`          | Диалог: permanent-тема `DIA_SE_GallahadSummon`, меню навыков |
 | `Scripts/SummonersExtention_Hook.d`         | Хуки лимита призыва и каста Джины                            |
+| `Scripts/JINA_AUTO_REVIVE.md`               | Спецификация автопризыва Джины (тайминги, HUD, канон)        |
 | `Scripts/SummonersExtention_Quest.d`        | Заготовка под квест (пока минимальная)                       |
 | `SummonersExtention/SummonersExtention.dll` | Union-плагин: восстановление лимита из `SE_PersistSummonMax` |
 
